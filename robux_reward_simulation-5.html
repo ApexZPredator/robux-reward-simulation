@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reward Center — Simulation</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0e1014;color:#fff;font-family:Arial,Helvetica,sans-serif}
+header{height:64px;background:#191b20;border-bottom:1px solid #30333a;display:flex;align-items:center;padding:0 20px;font-weight:900}
+.brand{font-size:22px;letter-spacing:-1px}.brand span{font-weight:400;color:#aaa}
+.wrap{max-width:520px;margin:0 auto;padding:28px 18px}
+.card{background:#1b1e24;border:1px solid #343840;border-radius:18px;padding:24px;box-shadow:0 16px 50px #0008}
+.notice{background:#332b10;border:1px solid #665414;color:#ffe28a;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:700;text-align:center;margin-bottom:20px}
+h1{font-size:27px;margin:5px 0 8px}.sub{color:#aeb3bd;margin:0 0 24px}
+label{display:block;font-size:13px;font-weight:800;margin:15px 0 7px}
+input,select{width:100%;padding:14px;border-radius:10px;border:1px solid #444852;background:#111318;color:#fff;font-size:16px;outline:none}
+input:focus,select:focus{border-color:#6ea8fe}
+.amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
+.amounts button{padding:10px 4px;border:1px solid #444852;background:#24272e;color:#fff;border-radius:9px;font-weight:800;cursor:pointer}
+.amounts button:hover{background:#30343c}
+.main{width:100%;margin-top:20px;padding:15px;border:0;border-radius:11px;background:#2f80ed;color:#fff;font-size:17px;font-weight:900;cursor:pointer}
+.result{display:none;text-align:center;padding-top:20px}
+.icon{width:64px;height:64px;border-radius:15px;background:#fff;margin:0 auto 15px;display:grid;place-items:center;transform:rotate(8deg)}
+.icon i{width:23px;height:23px;background:#1b1e24}
+.big{font-size:43px;font-weight:900;margin:10px 0 2px}.green{color:#7ee787;font-weight:800;font-size:14px}
+.back{margin-top:15px;background:#2b2f37}.small{font-size:12px;color:#999;line-height:1.45;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="toast" id="toast">
+  <div class="toast-inner">
+    <div class="toast-icon">🎁</div>
+    <div class="toast-copy">
+      <div class="toast-badge">SIMULATION</div>
+      <div class="toast-title">Reward notification</div>
+      <div class="toast-text" id="toastText"></div>
+    </div>
+  </div>
+  <div class="toast-bar"></div>
+</div>
+<header><div class="brand">REWARD <span>SIMULATION</span></div></header>
+<div class="wrap">
+<div class="card">
+<div class="notice">GIFT CARD</div>
+<section id="form">
+<h1>Send a Reward</h1>
+<p class="sub">Create a fictional reward screen for entertainment.</p>
+<label for="user">Username</label>
+<input id="user" value="anzelovn312" maxlength="30">
+<label>Amount</label>
+<div class="amounts">
+<button onclick="setAmount(100)">100</button>
+<button onclick="setAmount(500)">500</button>
+<button onclick="setAmount(1000)">1,000</button>
+<button onclick="setAmount(5000)">5,000</button>
+</div>
+<input id="amount" type="number" value="50000" min="1" max="99999999">
+<button class="main" onclick="showReward()">Create Simulation</button>
+<p class="small">This page is a fictional mock-up and is not affiliated with Roblox.</p>
+</section>
+<section id="result" class="result">
+<div class="icon"><i></i></div>
+<h1>Reward Added!</h1>
+<p class="sub" id="resultUser"></p>
+<div class="big" id="resultAmount"></div>
+<div class="green">SIMULATED ROBUX</div>
+<p class="sub">This reward exists only in this simulation.</p>
+<button class="main back" onclick="resetPage()">Create Another</button>
+</section>
+</div>
+</div>
+<script>
+function setAmount(n){document.getElementById('amount').value=n}
+let toastTimer;
+let audioCtx;
+
+function playNotificationSound(){
+ try{
+   audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+   if(audioCtx.state === 'suspended') audioCtx.resume();
+   const now = audioCtx.currentTime;
+   const gain = audioCtx.createGain();
+   gain.connect(audioCtx.destination);
+   gain.gain.setValueAtTime(0.0001, now);
+   gain.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
+   gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+
+   [660, 880].forEach((freq, i)=>{
+     const osc = audioCtx.createOscillator();
+     osc.type = 'sine';
+     osc.frequency.setValueAtTime(freq, now + i*0.09);
+     osc.connect(gain);
+     osc.start(now + i*0.09);
+     osc.stop(now + i*0.09 + 0.16);
+   });
+ }catch(e){}
+}
+
+function showReward(){
+ const u=document.getElementById('user').value.trim()||'Guest';
+ const a=Math.max(1, Number(document.getElementById('amount').value)||0);
+ document.getElementById('resultUser').textContent='@'+u;
+ document.getElementById('resultAmount').textContent=a.toLocaleString();
+ document.getElementById('form').style.display='none';
+ document.getElementById('result').style.display='block';
+
+ const toast=document.getElementById('toast');
+ clearTimeout(toastTimer);
+ toast.classList.remove('hide');
+ void toast.offsetWidth;
+ document.getElementById('toastText').textContent =
+   'Simulated '+a.toLocaleString()+' Robux reward for @'+u+'.';
+ toast.classList.add('show');
+ playNotificationSound();
+
+ toastTimer=setTimeout(()=>{
+   toast.classList.remove('show');
+   toast.classList.add('hide');
+ },4200);
+}
+function resetPage(){
+ document.getElementById('result').style.display='none';
+ document.getElementById('form').style.display='block';
+}
+</script>
+</body>
+</html>
